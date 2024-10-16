@@ -35,13 +35,15 @@ const (
 	controllerName  = "ibm-vpc-block-csi-controller"
 	nameSpace       = "kube-system"
 	controllerLabel = "app=ibm-vpc-block-csi-driver"
+	vpcBlock51      = "5.1"
+	vpcBlock52      = "5.2"
 )
 
 var (
 	driverVersion = flag.String("driverVersion", "", "5.1 or 5.2")
-	kubeConfig    = flag.String("kubeConfig", "", "If not provide in cluster config will be considered")
-	logger        *zap.Logger
-	podKind       string
+	//kubeConfig    = flag.String("kubeConfig", "", "If not provide in cluster config will be considered")
+	logger  *zap.Logger
+	podKind string
 )
 
 func main() {
@@ -79,12 +81,12 @@ func handle(logger *zap.Logger) {
 		logger.Fatal("Error getting k8s client", zap.Error(err))
 	}
 
-	if *driverVersion == "5.1" {
+	if *driverVersion == vpcBlock51 {
 		podKind = "StatefulSet"
 		deploymentsClient := k8sClient.Clientset.AppsV1().Deployments(nameSpace)
 
 		if _, err := deploymentsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
-			logger.Warn("Failed to find deployment, checking if any controller pods are running", zap.Error(err))
+			logger.Warn("Failed to find deployment", zap.Error(err))
 			controllerExists = false
 		}
 
@@ -93,12 +95,12 @@ func handle(logger *zap.Logger) {
 			cleanupVPCBlockCSIControllerDeployment(deploymentsClient, logger)
 		}
 
-	} else if *driverVersion == "5.2" {
+	} else if *driverVersion == vpcBlock52 {
 		podKind = "ReplicaSet"
 		statefulSetsClient := k8sClient.Clientset.AppsV1().StatefulSets(nameSpace)
 
 		if _, err := statefulSetsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
-			logger.Warn("Failed to find Statefulset, checking if any controller pods are running", zap.Error(err))
+			logger.Warn("Failed to find Statefulset", zap.Error(err))
 			controllerExists = false
 		}
 
@@ -110,6 +112,8 @@ func handle(logger *zap.Logger) {
 	} else {
 		logger.Fatal("Invalid driverVersion. Possible options 5.1 or 5.2")
 	}
+
+	logger.Info("Checking if any controller pods are leftover", zap.Error(err))
 
 	// Now wait until all existing ibm-vpc-block-csi-controller pods are deleted
 	checkIfControllerPodExists(k8sClient.Clientset, podKind, logger)
