@@ -18,7 +18,6 @@ LABEL build-date=${build_date}
 #RUN mkdir -p /home/vpc-node-label-updater/
 COPY vpc-node-label-updater /
 ADD vpc-node-label-updater /vpc-node-label-updater
-RUN cd /vpc-node-label-updater/ibm-csi-init-container
 #RUN chmod +x /vpc-node-label-updater
 
 USER 2121:2121

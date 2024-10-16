@@ -1,4 +1,4 @@
-module github.com/IBM/vpc-node-label-updater/ibm-csi-init-container
+module github.com/IBM/ibm-csi-init-container
 
 go 1.22.0
 
