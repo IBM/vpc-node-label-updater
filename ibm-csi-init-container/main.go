@@ -82,7 +82,7 @@ func handle(logger *zap.Logger) {
 	}
 
 	if *driverVersion == vpcBlock51 {
-		podKind = "StatefulSet"
+		podKind = "ReplicaSet"
 		deploymentsClient := k8sClient.Clientset.AppsV1().Deployments(nameSpace)
 
 		if _, err := deploymentsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
@@ -96,7 +96,7 @@ func handle(logger *zap.Logger) {
 		}
 
 	} else if *driverVersion == vpcBlock52 {
-		podKind = "ReplicaSet"
+		podKind = "StatefulSet"
 		statefulSetsClient := k8sClient.Clientset.AppsV1().StatefulSets(nameSpace)
 
 		if _, err := statefulSetsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
@@ -156,10 +156,11 @@ func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, 
 			logger.Fatal("ibm-vpc-block-csi-controller controller pods still exists. Init container will continue to check for this until these are cleanedup", zap.Error(getPodErr))
 		}
 		if !controllerExists {
-			logger.Info("All existing ibm-vpc-block-csi-controller pod deleted successfully")
 			break
 		}
 	}
+
+	logger.Info("ibm-vpc-block-csi-controller pod do not exist")
 
 }
 
