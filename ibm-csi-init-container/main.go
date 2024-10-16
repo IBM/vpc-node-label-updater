@@ -90,7 +90,7 @@ func handle(logger *zap.Logger) {
 
 		if controllerExists {
 			//Delete Deployment
-			cleanupVPCBlockCSIControllerDeployment(deploymentsClient, podKind, logger)
+			cleanupVPCBlockCSIControllerDeployment(deploymentsClient, logger)
 		}
 
 	} else if *driverVersion == "5.2" {
