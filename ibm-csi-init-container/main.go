@@ -153,7 +153,7 @@ func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, 
 	for _, pod := range pods.Items {
 		if strings.HasPrefix(pod.Name, controllerName) {
 			controllerExists = true
-			logger.Fatal("ibm-vpc-block-csi-controller controller pods still exists. Init container will continue to check for this until these are cleanedup", zap.Error(getPodErr))
+			logger.Fatal("ibm-vpc-block-csi-controller controller pods still exists. Init container will continue to check for this until these are cleaned-up", zap.Error(getPodErr))
 		}
 		if !controllerExists {
 			break
@@ -165,8 +165,7 @@ func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, 
 }
 
 func listPodsByKind(k8sclient kubernetes.Interface, namespace string, kind string) (*corev1.PodList, error) {
-	kindSelector := metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: kind},
-		LabelSelector: controllerLabel}
+	kindSelector := metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: kind}}
 	pods, err := k8sclient.CoreV1().Pods(namespace).List(context.TODO(), kindSelector)
 	return pods, err
 }
