@@ -16,8 +16,8 @@ LABEL build-date=${build_date}
 # RUN microdnf update && microdnf install -y ca-certificates
 
 #RUN mkdir -p /home/vpc-node-label-updater/
-COPY vpc-node-label-updater /
-ADD vpc-node-label-updater /vpc-node-label-updater
+COPY ibm-csi-init-container /
+ADD ibm-csi-init-container /vpc-node-label-updater
 #RUN chmod +x /vpc-node-label-updater
 
 USER 2121:2121
