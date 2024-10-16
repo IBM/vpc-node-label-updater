@@ -41,6 +41,7 @@ var (
 	driverVersion = flag.String("driverVersion", "", "5.1 or 5.2")
 	kubeConfig    = flag.String("kubeConfig", "", "If not provide in cluster config will be considered")
 	logger        *zap.Logger
+	podKind       string
 )
 
 func main() {
@@ -79,6 +80,7 @@ func handle(logger *zap.Logger) {
 	}
 
 	if *driverVersion == "5.1" {
+		podKind = "StatefulSet"
 		deploymentsClient := k8sClient.Clientset.AppsV1().Deployments(nameSpace)
 
 		if _, err := deploymentsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
@@ -88,13 +90,11 @@ func handle(logger *zap.Logger) {
 
 		if controllerExists {
 			//Delete Deployment
-			cleanupVPCBlockCSIControllerDeployment(deploymentsClient, logger)
+			cleanupVPCBlockCSIControllerDeployment(deploymentsClient, podKind, logger)
 		}
 
-		// Now wait until all existing ibm-vpc-block-csi-controller pods are deleted
-		checkIfControllerPodExists(k8sClient.Clientset, logger)
-
 	} else if *driverVersion == "5.2" {
+		podKind = "ReplicaSet"
 		statefulSetsClient := k8sClient.Clientset.AppsV1().StatefulSets(nameSpace)
 
 		if _, err := statefulSetsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
@@ -107,11 +107,12 @@ func handle(logger *zap.Logger) {
 			cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient, logger)
 		}
 
-		// Now wait until all existing ibm-vpc-block-csi-controller pods are deleted
-		checkIfControllerPodExists(k8sClient.Clientset, logger)
 	} else {
 		logger.Fatal("Invalid driverVersion. Possible options 5.1 or 5.2")
 	}
+
+	// Now wait until all existing ibm-vpc-block-csi-controller pods are deleted
+	checkIfControllerPodExists(k8sClient.Clientset, podKind, logger)
 }
 
 func cleanupVPCBlockCSIControllerDeployment(deploymentsClient v1.DeploymentInterface, logger *zap.Logger) {
@@ -136,16 +137,17 @@ func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetIn
 	logger.Info("StatefulSet deleted successfully")
 }
 
-func checkIfControllerPodExists(clientset kubernetes.Interface, logger *zap.Logger) {
+func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, logger *zap.Logger) {
 	controllerExists := false
 
-	pods, getPodErr := listPodsByLabel(clientset, nameSpace, "app=ibm-vpc-block-csi-driver")
+	logger.Info("Listing controller pods based on kind", zap.String("podKind", podKind))
+	pods, getPodErr := listPodsByKind(clientset, nameSpace, podKind)
 	if getPodErr != nil {
 		logger.Fatal("ERROR in fetching the controller pods", zap.Error(getPodErr))
 	}
 
 	for _, pod := range pods.Items {
-		if strings.HasPrefix(pod.Name, controllerName) && isPodRunningCompletely(&pod) {
+		if strings.HasPrefix(pod.Name, controllerName) {
 			controllerExists = true
 			logger.Fatal("ibm-vpc-block-csi-controller controller pods still exists. Init container will continue to check for this until these are cleanedup", zap.Error(getPodErr))
 		}
@@ -157,22 +159,8 @@ func checkIfControllerPodExists(clientset kubernetes.Interface, logger *zap.Logg
 
 }
 
-func listPodsByLabel(k8sclient kubernetes.Interface, namespace string, label string) (*corev1.PodList, error) {
-	var labelSelector metav1.ListOptions
-	if label != "" {
-		labelSelector = metav1.ListOptions{LabelSelector: label}
-	} else {
-		labelSelector = metav1.ListOptions{}
-	}
-	pods, err := k8sclient.CoreV1().Pods(namespace).List(context.TODO(), labelSelector)
+func listPodsByKind(k8sclient kubernetes.Interface, namespace string, kind string) (*corev1.PodList, error) {
+	kindSelector := metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: kind}}
+	pods, err := k8sclient.CoreV1().Pods(namespace).List(context.TODO(), kindSelector)
 	return pods, err
-}
-
-func isPodRunningCompletely(pod *corev1.Pod) bool {
-	for _, condition := range pod.Status.Conditions {
-		if condition.Status != "True" && condition.Reason != "PodCompleted" {
-			return false
-		}
-	}
-	return true
 }
