@@ -139,23 +139,22 @@ func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetIn
 func checkIfControllerPodExists(clientset kubernetes.Interface, logger *zap.Logger) {
 	controllerExists := false
 
-	for {
-		pods, getPodErr := listPodsByLabel(clientset, nameSpace, "app=ibm-vpc-block-csi-driver")
-		if getPodErr != nil {
-			logger.Fatal("ERROR in fetching the controller pods", zap.Error(getPodErr))
-		}
+	pods, getPodErr := listPodsByLabel(clientset, nameSpace, "app=ibm-vpc-block-csi-driver")
+	if getPodErr != nil {
+		logger.Fatal("ERROR in fetching the controller pods", zap.Error(getPodErr))
+	}
 
-		for _, pod := range pods.Items {
-			if strings.HasPrefix(pod.Name, controllerName) {
-				controllerExists = true
-				logger.Fatal("ibm-vpc-block-csi-controller controller pods still exists. Init container will continue to check for this until these are cleanedup", zap.Error(getPodErr))
-			}
-			if !controllerExists {
-				logger.Info("All existing ibm-vpc-block-csi-controller pod deleted successfully")
-				break
-			}
+	for _, pod := range pods.Items {
+		if strings.HasPrefix(pod.Name, controllerName) && isPodRunningCompletely(&pod) {
+			controllerExists = true
+			logger.Fatal("ibm-vpc-block-csi-controller controller pods still exists. Init container will continue to check for this until these are cleanedup", zap.Error(getPodErr))
+		}
+		if !controllerExists {
+			logger.Info("All existing ibm-vpc-block-csi-controller pod deleted successfully")
+			break
 		}
 	}
+
 }
 
 func listPodsByLabel(k8sclient kubernetes.Interface, namespace string, label string) (*corev1.PodList, error) {
@@ -167,4 +166,13 @@ func listPodsByLabel(k8sclient kubernetes.Interface, namespace string, label str
 	}
 	pods, err := k8sclient.CoreV1().Pods(namespace).List(context.TODO(), labelSelector)
 	return pods, err
+}
+
+func isPodRunningCompletely(pod *corev1.Pod) bool {
+	for _, condition := range pod.Status.Conditions {
+		if condition.Status != "True" && condition.Reason != "PodCompleted" {
+			return false
+		}
+	}
+	return true
 }
