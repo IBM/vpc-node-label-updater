@@ -42,9 +42,8 @@ const (
 
 var (
 	driverVersion = flag.String("driverVersion", "", "5.1 or 5.2")
-	//kubeConfig    = flag.String("kubeConfig", "", "If not provide in cluster config will be considered")
-	logger  *zap.Logger
-	podKind string
+	logger        *zap.Logger
+	podKind       string
 )
 
 func main() {
@@ -71,8 +70,6 @@ func setUpLogger() *zap.Logger {
 }
 
 func handle(logger *zap.Logger) {
-	controllerExists := true
-
 	logger.Info("Starting kube-client")
 
 	// Setup Cloud Provider
@@ -83,46 +80,18 @@ func handle(logger *zap.Logger) {
 	}
 
 	if *driverVersion == vpcBlock51 {
+		//Delete Deployment
 		podKind = "ReplicaSet"
-		deploymentsClient := k8sClient.Clientset.AppsV1().Deployments(nameSpace)
-
-		if _, err := deploymentsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
-			if apierrs.IsNotFound(err) {
-				logger.Warn("Deployment not found", zap.String("Deployment", controllerName), zap.Error(err))
-			} else {
-				logger.Fatal("Failed to get deployment", zap.String("Deployment", controllerName), zap.Error(err))
-			}
-			controllerExists = false
-		}
-
-		if controllerExists {
-			//Delete Deployment
-			cleanupVPCBlockCSIControllerDeployment(deploymentsClient, logger)
-		}
-
+		cleanupVPCBlockCSIControllerDeployment(k8sClient.Clientset.AppsV1().Deployments(nameSpace), logger)
 	} else if *driverVersion == vpcBlock52 {
+		//Delete StatefulSet
 		podKind = "StatefulSet"
-		statefulSetsClient := k8sClient.Clientset.AppsV1().StatefulSets(nameSpace)
-
-		if _, err := statefulSetsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
-			if apierrs.IsNotFound(err) {
-				logger.Warn("StatefulSet not found", zap.String("StatefulSet", controllerName), zap.Error(err))
-			} else {
-				logger.Fatal("Failed to get statefulSet", zap.String("StatefulSet", controllerName), zap.Error(err))
-			}
-			controllerExists = false
-		}
-
-		if controllerExists {
-			//Delete Statefulset
-			cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient, logger)
-		}
-
+		cleanupVPCBlockCSIControllerStatefulset(k8sClient.Clientset.AppsV1().StatefulSets(nameSpace), logger)
 	} else {
 		logger.Fatal("Invalid driverVersion. Possible options 5.1 or 5.2")
 	}
 
-	logger.Info("Checking if any controller pods are leftover", zap.Error(err))
+	logger.Info("Checking if any VPC Block CSI Controller pods are leftover", zap.Error(err))
 
 	// Now wait until all existing ibm-vpc-block-csi-controller pods are deleted
 	checkIfControllerPodExists(k8sClient.Clientset, podKind, logger)
@@ -134,9 +103,14 @@ func cleanupVPCBlockCSIControllerDeployment(deploymentsClient v1.DeploymentInter
 	if err := deploymentsClient.Delete(context.TODO(), controllerName, metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	}); err != nil {
-		logger.Fatal("Failed to delete deployment", zap.Error(err))
+		if apierrs.IsNotFound(err) {
+			logger.Info("Deployment not found", zap.String("Deployment", controllerName), zap.Error(err))
+		} else {
+			logger.Fatal("Failed to delete deployment, please cleanup the deployment manually so that VPC Block CSI Driver is up and running", zap.String("Deployment", controllerName), zap.Error(err))
+		}
+	} else {
+		logger.Info("Deployment deleted successfully")
 	}
-	logger.Info("Deployment deleted successfully")
 }
 
 func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetInterface, logger *zap.Logger) {
@@ -145,9 +119,14 @@ func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetIn
 	if err := statefulSetsClient.Delete(context.TODO(), controllerName, metav1.DeleteOptions{
 		PropagationPolicy: &deletePolicy,
 	}); err != nil {
-		logger.Fatal("Failed to delete statefulSet", zap.Error(err))
+		if apierrs.IsNotFound(err) {
+			logger.Info("StatefulSet not found", zap.String("StatefulSet", controllerName), zap.Error(err))
+		} else {
+			logger.Fatal("Failed to delete statefulSet, please cleanup the statefulSet manually so that VPC Block CSI Driver is up and running", zap.String("StatefulSet", controllerName), zap.Error(err))
+		}
+	} else {
+		logger.Info("StatefulSet deleted successfully")
 	}
-	logger.Info("StatefulSet deleted successfully")
 }
 
 func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, logger *zap.Logger) {
@@ -156,13 +135,13 @@ func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, 
 	logger.Info("Listing controller pods based on kind", zap.String("podKind", podKind))
 	pods, getPodErr := listPodsByKind(clientset, nameSpace, podKind)
 	if getPodErr != nil {
-		logger.Fatal("ERROR in fetching the controller pods", zap.Error(getPodErr))
+		logger.Fatal("ERROR in fetching the VPC Block CSI Controller pods, Please cleanup the pods manually so that VPC Block CSI Driver is up and running", zap.Error(getPodErr))
 	}
 
 	for _, pod := range pods.Items {
 		if strings.HasPrefix(pod.Name, controllerName) {
 			controllerExists = true
-			logger.Fatal("ibm-vpc-block-csi-controller controller pods still exists. Init container will continue to check for this until these are cleaned-up", zap.Error(getPodErr))
+			logger.Fatal("ibm-vpc-block-csi-controller VPC Block CSI Controller pods still exists. Please cleanup the pods manually so that VPC Block CSI Driver is up and running", zap.Error(getPodErr))
 		}
 		if !controllerExists {
 			break
