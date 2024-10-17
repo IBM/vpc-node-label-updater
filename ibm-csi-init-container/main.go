@@ -20,6 +20,7 @@ import (
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	corev1 "k8s.io/api/core/v1"
+	apierrs "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/kubernetes"
 	v1 "k8s.io/client-go/kubernetes/typed/apps/v1"
@@ -86,7 +87,11 @@ func handle(logger *zap.Logger) {
 		deploymentsClient := k8sClient.Clientset.AppsV1().Deployments(nameSpace)
 
 		if _, err := deploymentsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
-			logger.Warn("Failed to find deployment", zap.Error(err))
+			if apierrs.IsNotFound(err) {
+				logger.Warn("Deployment not found", zap.String("Deployment", controllerName), zap.Error(err))
+			} else {
+				logger.Fatal("Failed to get deployment", zap.String("Deployment", controllerName), zap.Error(err))
+			}
 			controllerExists = false
 		}
 
@@ -100,7 +105,11 @@ func handle(logger *zap.Logger) {
 		statefulSetsClient := k8sClient.Clientset.AppsV1().StatefulSets(nameSpace)
 
 		if _, err := statefulSetsClient.Get(context.TODO(), controllerName, metav1.GetOptions{}); err != nil {
-			logger.Warn("Failed to find Statefulset", zap.Error(err))
+			if apierrs.IsNotFound(err) {
+				logger.Warn("StatefulSet not found", zap.String("StatefulSet", controllerName), zap.Error(err))
+			} else {
+				logger.Fatal("Failed to get statefulSet", zap.String("StatefulSet", controllerName), zap.Error(err))
+			}
 			controllerExists = false
 		}
 
@@ -165,6 +174,7 @@ func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, 
 }
 
 func listPodsByKind(k8sclient kubernetes.Interface, namespace string, kind string) (*corev1.PodList, error) {
+	//If we add multiple filters like labelselector, it will do OR and we will get unwanted pods.
 	kindSelector := metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: kind}}
 	pods, err := k8sclient.CoreV1().Pods(namespace).List(context.TODO(), kindSelector)
 	return pods, err
