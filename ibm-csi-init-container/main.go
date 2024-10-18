@@ -160,7 +160,7 @@ func cleanupDepPod(clientset kubernetes.Interface, logger *zap.Logger) {
 
 	for _, pod := range pods.Items {
 		logger.Info("pod name", zap.String("podName", pod.Name))
-		if strings.HasPrefix(pod.Name, controllerName) && (pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodPending) {
+		if strings.HasPrefix(pod.Name, controllerName) && pod.Status.Phase == corev1.PodRunning {
 			//Try to clean up the deployment csi controller pod
 			cleanupCtrlPod(clientset, pod.Name, logger)
 		}
