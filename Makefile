@@ -1,6 +1,6 @@
 SHELL = /bin/bash
-EXE_WATCHER_NAME=vpc-node-label-updater
-WATCHER_NAME=vpcNodeLabelUpdater
+EXE_WATCHER_NAME=ibm-csi-init-container
+WATCHER_NAME=ibmCSIInitContainer
 IMAGE = ibm/${EXE_WATCHER_NAME}
 GOPACKAGES=$(shell go list ./... | grep -v /vendor/ | grep -v /cmd | grep -v /tests)
 VERSION := latest
@@ -51,7 +51,7 @@ lint:
 
 .PHONY: build
 build:
-	CGO_ENABLED=0 GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) go build -mod=vendor -a -ldflags '-X main.vendorVersion='"${WATCHER_NAME}-${GIT_COMMIT_SHA}"' -extldflags "-static"' -o ${GOPATH}/bin/${EXE_WATCHER_NAME} ./cmd/
+	CGO_ENABLED=0 GOOS=$(shell go env GOOS) GOARCH=$(shell go env GOARCH) go build -mod=vendor -a -ldflags '-X main.vendorVersion='"${WATCHER_NAME}-${GIT_COMMIT_SHA}"' -extldflags "-static"' -o ${GOPATH}/bin/${EXE_WATCHER_NAME} ./ibm-csi-init-container/
 
 .PHONY: test
 test:
