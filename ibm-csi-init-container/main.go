@@ -145,6 +145,7 @@ func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, 
 	}
 
 	for _, pod := range pods.Items {
+		logger.Info("pod name", zap.String("podKind", pod.Name))
 		if strings.HasPrefix(pod.Name, controllerName) {
 			logger.Fatal("ibm-vpc-block-csi-controller VPC Block CSI Controller pods still exists. Please cleanup the pods manually so that VPC Block CSI Driver is up and running.", zap.Error(getPodErr))
 		}
