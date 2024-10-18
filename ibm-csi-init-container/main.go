@@ -44,7 +44,6 @@ const (
 var (
 	driverVersion = flag.String("driverVersion", "", "Possible values 5.1, 5.2 or greater")
 	logger        *zap.Logger
-	podKind       string
 )
 
 func main() {
@@ -89,11 +88,9 @@ func handle(logger *zap.Logger) {
 
 	if version == vpcBlock51 {
 		//Delete Deployment
-		podKind = "ReplicaSet"
 		cleanupVPCBlockCSIControllerDeployment(k8sClient.Clientset.AppsV1().Deployments(nameSpace), logger)
 	} else if version >= vpcBlock52 {
 		//Delete StatefulSet
-		podKind = "StatefulSet"
 		cleanupVPCBlockCSIControllerStatefulset(k8sClient.Clientset.AppsV1().StatefulSets(nameSpace), logger)
 	} else {
 		logger.Info("Invalid driverVersion. Possible options 5.1, 5.2 or greater. By passing the checks and cleanup of old leftover IBM VPC Block CSI controller pods. ")
@@ -102,7 +99,7 @@ func handle(logger *zap.Logger) {
 	logger.Info("Checking if any VPC Block CSI Controller pods are leftover", zap.Error(err))
 
 	// Now wait until all existing ibm-vpc-block-csi-controller pods are deleted
-	checkIfControllerPodExists(k8sClient.Clientset, podKind, logger)
+	checkIfControllerPodExists(k8sClient.Clientset, logger)
 }
 
 func cleanupVPCBlockCSIControllerDeployment(deploymentsClient v1.DeploymentInterface, logger *zap.Logger) {
@@ -137,25 +134,24 @@ func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetIn
 	}
 }
 
-func checkIfControllerPodExists(clientset kubernetes.Interface, podKind string, logger *zap.Logger) {
-	logger.Info("Listing controller pods based on kind", zap.String("podKind", podKind))
-	pods, getPodErr := listPodsByKind(clientset, nameSpace, podKind)
+func checkIfControllerPodExists(clientset kubernetes.Interface, logger *zap.Logger) {
+	logger.Info("Listing controller pods based on label", zap.String("controllerLabel", controllerLabel))
+	pods, getPodErr := listPodsByLabels(clientset, nameSpace, controllerLabel)
 	if getPodErr != nil {
 		logger.Fatal("ERROR in fetching the VPC Block CSI Controller pods, Please cleanup the pods manually so that VPC Block CSI Driver is up and running. Run command \"kubectl delete pod -n kube-system ibm-vpc-block-csi-controller-xxx\"", zap.Error(getPodErr))
 	}
 
 	for _, pod := range pods.Items {
 		logger.Info("pod name", zap.String("podKind", pod.Name))
-		if strings.HasPrefix(pod.Name, controllerName) {
+		if strings.HasPrefix(pod.Name, controllerName) && pod.Status.Phase == corev1.PodRunning {
 			logger.Fatal("ibm-vpc-block-csi-controller VPC Block CSI Controller pods still exists. Please cleanup the pods manually so that VPC Block CSI Driver is up and running.", zap.Error(getPodErr))
 		}
 	}
 	logger.Info("ibm-vpc-block-csi-controller pod do not exist")
 }
 
-func listPodsByKind(k8sclient kubernetes.Interface, namespace string, kind string) (*corev1.PodList, error) {
-	//If we add multiple filters like labelselector, it will do OR and we will get unwanted pods.
-	kindSelector := metav1.ListOptions{TypeMeta: metav1.TypeMeta{Kind: kind}}
-	pods, err := k8sclient.CoreV1().Pods(namespace).List(context.TODO(), kindSelector)
+func listPodsByLabels(k8sclient kubernetes.Interface, namespace string, label string) (*corev1.PodList, error) {
+	labelSelector := metav1.ListOptions{LabelSelector: label}
+	pods, err := k8sclient.CoreV1().Pods(namespace).List(context.TODO(), labelSelector)
 	return pods, err
 }
