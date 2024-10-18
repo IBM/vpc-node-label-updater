@@ -77,7 +77,7 @@ func handle(logger *zap.Logger) {
 	version, err := strconv.ParseFloat(*driverVersion, 64)
 	if err != nil {
 		logger.Warn("error in parsing driver version value", zap.Error(err), zap.Float64("version", version))
-		logger.Fatal("Please check if any older version VPC Block CSI Driver version is running. Please disable and enabled the VPC Block CSI Driver.If error persists open support ticket")
+		logger.Fatal("Please check if any older version VPC Block CSI Driver version is running. Please disable and enable the VPC Block CSI Driver.If error persists open support ticket")
 	}
 
 	// Setup Cloud Provider
@@ -85,7 +85,7 @@ func handle(logger *zap.Logger) {
 
 	if err != nil {
 		logger.Warn("Error getting k8s client", zap.Error(err))
-		logger.Fatal("Please check if any older version VPC Block CSI Driver version is running. Please disable and enabled the VPC Block CSI Driver.If error persists open support ticket")
+		logger.Fatal("Please check if any older version VPC Block CSI Driver version is running. Please disable and enable the VPC Block CSI Driver.If error persists open support ticket")
 	}
 
 	// In case deploying version is 5.1 then we need to clean the deployment which belongs to 5.2 or later version
@@ -100,8 +100,10 @@ func handle(logger *zap.Logger) {
 		//Delete if any leftover StatefulSet controller pod
 		cleanupCtrlPod(k8sClient.Clientset, ssctrlPod, logger)
 	} else {
-		logger.Fatal("Please check if any older version VPC Block CSI Driver version is running. Please disable and enabled the VPC Block CSI Driver.If error persists open support ticket")
+		logger.Fatal("Please check if any older version VPC Block CSI Driver version is running. Please disable and enable the VPC Block CSI Driver.If error persists open support ticket")
 	}
+
+	logger.Info("csi-init-container started successfully, no more leftover VPC Block CSI controller pods exists.")
 }
 
 func cleanupVPCBlockCSIControllerDeployment(deploymentsClient v1.DeploymentInterface, logger *zap.Logger) {
@@ -160,6 +162,7 @@ func cleanupDepPod(clientset kubernetes.Interface, logger *zap.Logger) {
 
 	for _, pod := range pods.Items {
 		logger.Info("pod name", zap.String("podName", pod.Name))
+		//Future enhancment check for Pending Pods along with Version. As initContainer pods will also result in pending state.
 		if strings.HasPrefix(pod.Name, controllerName) && pod.Status.Phase == corev1.PodRunning {
 			//Try to clean up the deployment csi controller pod
 			cleanupCtrlPod(clientset, pod.Name, logger)
