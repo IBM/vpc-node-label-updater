@@ -35,12 +35,13 @@ func init() {
 }
 
 const (
-	controllerName  = "ibm-vpc-block-csi-controller"
-	nameSpace       = "kube-system"
-	ssctrlPod       = "ibm-vpc-block-csi-controller-0"
-	controllerLabel = "app=ibm-vpc-block-csi-driver"
-	vpcBlock51      = 5.1
-	vpcBlock52      = 5.2
+	controllerName      = "ibm-vpc-block-csi-controller"
+	nameSpace           = "kube-system"
+	ssctrlPod           = "ibm-vpc-block-csi-controller-0"
+	controllerLabel     = "app=ibm-vpc-block-csi-driver"
+	driverContainerName = "iks-vpc-block-driver"
+	vpcBlock51          = 5.1
+	vpcBlock52          = 5.2
 )
 
 var (
@@ -94,16 +95,20 @@ func handle(logger *zap.Logger) {
 		cleanupVPCBlockCSIControllerDeployment(k8sClient.Clientset.AppsV1().Deployments(nameSpace), logger)
 		//Delete if any leftover Deployment controller pod
 		cleanupDepPod(k8sClient.Clientset, logger)
+
+		logger.Info("csi-init-container started successfully, there exists no 5.2 VPC Block CSI Controller Deployment Pods.")
+
 	} else if version >= vpcBlock52 { // In case deploying version is 5.2 then we need to clean the statefulset which belongs to 5.1 or earlier version
 		//Delete StatefulSet
 		cleanupVPCBlockCSIControllerStatefulset(k8sClient.Clientset.AppsV1().StatefulSets(nameSpace), logger)
 		//Delete if any leftover StatefulSet controller pod
 		cleanupCtrlPod(k8sClient.Clientset, ssctrlPod, logger)
+
+		logger.Info("csi-init-container started successfully, there exists no 5.1 or earlier VPC Block CSI Controller Statefulset Pods.")
+
 	} else {
 		logger.Fatal("Please check if any older version VPC Block CSI Driver version is running. Please disable and enable the VPC Block CSI Driver.If error persists open support ticket")
 	}
-
-	logger.Info("csi-init-container started successfully, no more leftover VPC Block CSI controller pods exists.")
 }
 
 func cleanupVPCBlockCSIControllerDeployment(deploymentsClient v1.DeploymentInterface, logger *zap.Logger) {
@@ -140,7 +145,6 @@ func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetIn
 
 // Delete controller POD created by deployment or statefulset
 func cleanupCtrlPod(clientset kubernetes.Interface, ctrPodName string, logger *zap.Logger) {
-	logger.Info("Deleting controller pod", zap.String("ctrPodName", ctrPodName))
 	if err := clientset.CoreV1().Pods(nameSpace).Delete(context.TODO(), ctrPodName, metav1.DeleteOptions{}); err != nil {
 		if apierrs.IsNotFound(err) {
 			logger.Info("CSI Controller pod not found which is expected case", zap.String("ctrPodName", ctrPodName), zap.Error(err))
@@ -160,10 +164,11 @@ func cleanupDepPod(clientset kubernetes.Interface, logger *zap.Logger) {
 		logger.Fatal("ERROR in fetching the VPC Block CSI Controller pods, Please cleanup the pods manually so that VPC Block CSI Driver is up and running. Run command \"kubectl delete pod -n kube-system ibm-vpc-block-csi-controller-xxx\"", zap.Error(getPodErr))
 	}
 
+	podUID := os.Getenv("POD_UID")
 	for _, pod := range pods.Items {
-		logger.Info("pod name", zap.String("podName", pod.Name))
-		//Future enhancment check for Pending Pods along with Version. As initContainer pods will also result in pending state.
-		if strings.HasPrefix(pod.Name, controllerName) && pod.Status.Phase == corev1.PodRunning {
+		logger.Info("Pod Details", zap.String("podName", pod.Name), zap.String("podUID", string(pod.UID)))
+		//Check if pod has controller prefix and the UID is not matching with upcoming Statefulset Pod
+		if strings.HasPrefix(pod.Name, controllerName) && podUID != "" && podUID != string(pod.UID) {
 			//Try to clean up the deployment csi controller pod
 			cleanupCtrlPod(clientset, pod.Name, logger)
 		}
