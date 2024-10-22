@@ -118,7 +118,7 @@ func cleanupVPCBlockCSIControllerDeployment(deploymentsClient v1.DeploymentInter
 		PropagationPolicy: &deletePolicy,
 	}); err != nil {
 		if apierrs.IsNotFound(err) {
-			logger.Info("Deployment not found which is expected case", zap.String("Deployment", controllerName), zap.Error(err))
+			logger.Info("Deployment not found which is expected case", zap.String("Deployment", controllerName))
 		} else {
 			logger.Fatal("Failed to delete deployment, please cleanup the deployment manually so that VPC Block CSI Driver is up and running. Run command with admin access \"kubectl delete deployment -n kube-system ibm-vpc-block-csi-controller\"", zap.String("Deployment", controllerName), zap.Error(err))
 		}
@@ -134,7 +134,7 @@ func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetIn
 		PropagationPolicy: &deletePolicy,
 	}); err != nil {
 		if apierrs.IsNotFound(err) {
-			logger.Info("StatefulSet not found which is expected case", zap.String("StatefulSet", controllerName), zap.Error(err))
+			logger.Info("StatefulSet not found which is expected case", zap.String("StatefulSet", controllerName))
 		} else {
 			logger.Fatal("Failed to delete statefulSet, please cleanup the statefulSet manually so that VPC Block CSI Driver is up and running. Run command with admin access \"kubectl delete statefulset -n kube-system ibm-vpc-block-csi-controller\"", zap.String("StatefulSet", controllerName), zap.Error(err))
 		}
@@ -147,7 +147,7 @@ func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetIn
 func cleanupCtrlPod(clientset kubernetes.Interface, ctrPodName string, logger *zap.Logger) {
 	if err := clientset.CoreV1().Pods(nameSpace).Delete(context.TODO(), ctrPodName, metav1.DeleteOptions{}); err != nil {
 		if apierrs.IsNotFound(err) {
-			logger.Info("CSI Controller pod not found which is expected case", zap.String("ctrPodName", ctrPodName), zap.Error(err))
+			logger.Info("CSI Controller pod not found which is expected case", zap.String("ctrPodName", ctrPodName))
 		} else {
 			errStr := fmt.Sprintf("Failed to deleted CSI Controller pod, please cleanup the pod manually so that VPC Block CSI Driver is up and running. Run command \"kubectl delete pod -n kube-system %s\"", ctrPodName)
 			logger.Fatal(errStr, zap.Error(err))
