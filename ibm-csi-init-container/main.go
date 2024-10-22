@@ -146,7 +146,7 @@ func cleanupVPCBlockCSIControllerStatefulset(statefulSetsClient v1.StatefulSetIn
 func cleanupCtrlPod(clientset kubernetes.Interface, ctrPodName string, logger *zap.Logger) {
 	if err := clientset.CoreV1().Pods(nameSpace).Delete(context.TODO(), ctrPodName, metav1.DeleteOptions{}); err != nil {
 		if apierrs.IsNotFound(err) {
-			logger.Info("CSI Controller pod not found which is expected case", zap.String("ctrPodName", ctrPodName))
+			logger.Info("There is no existing CSI Controller pod running which is expected case", zap.String("ctrPodName", ctrPodName))
 		} else {
 			errStr := fmt.Sprintf("Failed to deleted CSI Controller pod, please cleanup the pod manually so that VPC Block CSI Driver is up and running. Run command \"kubectl delete pod -n kube-system %s\"", ctrPodName)
 			logger.Fatal(errStr, zap.Error(err))
@@ -165,7 +165,7 @@ func cleanupDepPod(clientset kubernetes.Interface, logger *zap.Logger) {
 
 	for _, pod := range pods.Items {
 		logger.Info("Pod Details", zap.String("podName", pod.Name))
-		//Delete all the controller pods except the self controller pod
+		//Delete all the controller pods except the self statefulset controller pod
 		if strings.HasPrefix(pod.Name, controllerName) && pod.Name != ssctrlPod {
 			//Try to clean up the deployment csi controller pod
 			cleanupCtrlPod(clientset, pod.Name, logger)
