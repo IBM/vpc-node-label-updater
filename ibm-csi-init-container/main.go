@@ -35,13 +35,12 @@ func init() {
 }
 
 const (
-	controllerName      = "ibm-vpc-block-csi-controller"
-	nameSpace           = "kube-system"
-	ssctrlPod           = "ibm-vpc-block-csi-controller-0"
-	controllerLabel     = "app=ibm-vpc-block-csi-driver"
-	driverContainerName = "iks-vpc-block-driver"
-	vpcBlock51          = 5.1
-	vpcBlock52          = 5.2
+	controllerName  = "ibm-vpc-block-csi-controller"
+	nameSpace       = "kube-system"
+	ssctrlPod       = "ibm-vpc-block-csi-controller-0"
+	controllerLabel = "app=ibm-vpc-block-csi-driver"
+	vpcBlock51      = 5.1
+	vpcBlock52      = 5.2
 )
 
 var (
@@ -96,7 +95,7 @@ func handle(logger *zap.Logger) {
 		//Delete if any leftover Deployment controller pod
 		cleanupDepPod(k8sClient.Clientset, logger)
 
-		logger.Info("csi-init-container started successfully, there exists no 5.2 VPC Block CSI Controller Deployment Pods.")
+		logger.Info("csi-init-container started successfully, there is no 5.2 or later VPC Block CSI Controller Deployment Pods in the cluster.")
 
 	} else if version >= vpcBlock52 { // In case deploying version is 5.2 then we need to clean the statefulset which belongs to 5.1 or earlier version
 		//Delete StatefulSet
@@ -104,7 +103,7 @@ func handle(logger *zap.Logger) {
 		//Delete if any leftover StatefulSet controller pod
 		cleanupCtrlPod(k8sClient.Clientset, ssctrlPod, logger)
 
-		logger.Info("csi-init-container started successfully, there exists no 5.1 or earlier VPC Block CSI Controller Statefulset Pods.")
+		logger.Info("csi-init-container started successfully, there is no 5.1 or earlier VPC Block CSI Controller Statefulset Pods in the cluster.")
 
 	} else {
 		logger.Fatal("Please check if any older version VPC Block CSI Driver version is running. Please disable and enable the VPC Block CSI Driver.If error persists open support ticket")
@@ -164,11 +163,10 @@ func cleanupDepPod(clientset kubernetes.Interface, logger *zap.Logger) {
 		logger.Fatal("ERROR in fetching the VPC Block CSI Controller pods, Please cleanup the pods manually so that VPC Block CSI Driver is up and running. Run command \"kubectl delete pod -n kube-system ibm-vpc-block-csi-controller-xxx\"", zap.Error(getPodErr))
 	}
 
-	podUID := os.Getenv("POD_UID")
 	for _, pod := range pods.Items {
-		logger.Info("Pod Details", zap.String("podName", pod.Name), zap.String("podUID", string(pod.UID)))
-		//Check if pod has controller prefix and the UID is not matching with upcoming Statefulset Pod
-		if strings.HasPrefix(pod.Name, controllerName) && podUID != "" && podUID != string(pod.UID) {
+		logger.Info("Pod Details", zap.String("podName", pod.Name))
+		//Delete all the controller pods except the self controller pod
+		if strings.HasPrefix(pod.Name, controllerName) && pod.Name != ssctrlPod {
 			//Try to clean up the deployment csi controller pod
 			cleanupCtrlPod(clientset, pod.Name, logger)
 		}
