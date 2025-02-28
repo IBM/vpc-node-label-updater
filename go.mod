@@ -5,12 +5,12 @@ go 1.22.0
 require (
 	github.com/IBM/ibmcloud-volume-interface v1.2.6
 	github.com/IBM/secret-common-lib v1.1.11
-	github.com/IBM/secret-utils-lib v1.1.11
+	github.com/IBM/secret-utils-lib v1.1.12
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.20.0
-	k8s.io/api v0.30.4
-	k8s.io/apimachinery v0.30.4
-	k8s.io/client-go v0.30.4
+	k8s.io/api v0.30.10
+	k8s.io/apimachinery v0.30.10
+	k8s.io/client-go v0.30.10
 )
 
 require (
@@ -32,7 +32,6 @@ require (
 	github.com/go-playground/universal-translator v0.18.1 // indirect
 	github.com/go-playground/validator/v10 v10.19.0 // indirect
 	github.com/gogo/protobuf v1.3.2 // indirect
-	github.com/golang-jwt/jwt v3.2.2+incompatible // indirect
 	github.com/golang-jwt/jwt/v4 v4.5.1 // indirect
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/gnostic-models v0.6.8 // indirect
@@ -63,8 +62,8 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 	golang.org/x/time v0.3.0 // indirect
 	google.golang.org/appengine v1.6.8 // indirect
-	google.golang.org/genproto v0.0.0-20201019141844-1ed22bb0c154 // indirect
-	google.golang.org/grpc v1.47.0 // indirect
+	google.golang.org/genproto/googleapis/rpc v0.0.0-20231106174013-bbf56f31fb17 // indirect
+	google.golang.org/grpc v1.59.0 // indirect
 	google.golang.org/protobuf v1.33.0 // indirect
 	gopkg.in/inf.v0 v0.9.1 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
