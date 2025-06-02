@@ -26,13 +26,15 @@ type VPCVolume struct {
 	VolumeEncryptionKey *VolumeEncryptionKey `json:"encryption_key,omitempty"`
 	Profile             *Profile             `json:"profile,omitempty"`
 	CRN                 string               `json:"crn,omitempty"`
+	Status              string               `json:"status,omitempty"`
+	Tags                []string             `json:"volume_tags,omitempty"`
+	Bandwidth           int32                `json:"bandwidth,omitempty"`
 	VPCBlockVolume
 	VPCFileVolume
 }
 
 // VPCBlockVolume specific parameters
 type VPCBlockVolume struct {
-	Tags              []string            `json:"volume_tags,omitempty"`
 	VolumeAttachments *[]VolumeAttachment `json:"volume_attachments,omitempty"`
 }
 
