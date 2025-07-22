@@ -8,19 +8,19 @@ github.com/IBM-Cloud/ibm-cloud-cli-sdk/common/rest
 # github.com/IBM/go-sdk-core/v5 v5.17.4
 ## explicit; go 1.20
 github.com/IBM/go-sdk-core/v5/core
-# github.com/IBM/ibmcloud-volume-interface v1.2.12
-## explicit; go 1.23.8
+# github.com/IBM/ibmcloud-volume-interface v1.2.13
+## explicit; go 1.23.10
 github.com/IBM/ibmcloud-volume-interface/config
 github.com/IBM/ibmcloud-volume-interface/lib/provider
 github.com/IBM/ibmcloud-volume-interface/lib/utils
 github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode
 github.com/IBM/ibmcloud-volume-interface/provider/iam
-# github.com/IBM/secret-common-lib v1.1.12
-## explicit; go 1.23.8
+# github.com/IBM/secret-common-lib v1.1.13
+## explicit; go 1.23.10
 github.com/IBM/secret-common-lib/pkg/secret_provider
 github.com/IBM/secret-common-lib/pkg/utils
-# github.com/IBM/secret-utils-lib v1.1.13
-## explicit; go 1.23.8
+# github.com/IBM/secret-utils-lib v1.1.14
+## explicit; go 1.23.10
 github.com/IBM/secret-utils-lib/pkg/authenticator
 github.com/IBM/secret-utils-lib/pkg/config
 github.com/IBM/secret-utils-lib/pkg/k8s_utils
@@ -200,8 +200,8 @@ golang.org/x/net/idna
 golang.org/x/net/internal/httpcommon
 golang.org/x/net/internal/timeseries
 golang.org/x/net/trace
-# golang.org/x/oauth2 v0.23.0
-## explicit; go 1.18
+# golang.org/x/oauth2 v0.27.0
+## explicit; go 1.23.0
 golang.org/x/oauth2
 golang.org/x/oauth2/internal
 # golang.org/x/sys v0.31.0
@@ -280,7 +280,7 @@ google.golang.org/grpc/serviceconfig
 google.golang.org/grpc/stats
 google.golang.org/grpc/status
 google.golang.org/grpc/tap
-# google.golang.org/protobuf v1.35.1
+# google.golang.org/protobuf v1.36.1
 ## explicit; go 1.21
 google.golang.org/protobuf/encoding/protojson
 google.golang.org/protobuf/encoding/prototext
@@ -303,6 +303,7 @@ google.golang.org/protobuf/internal/genid
 google.golang.org/protobuf/internal/impl
 google.golang.org/protobuf/internal/order
 google.golang.org/protobuf/internal/pragma
+google.golang.org/protobuf/internal/protolazy
 google.golang.org/protobuf/internal/set
 google.golang.org/protobuf/internal/strs
 google.golang.org/protobuf/internal/version
@@ -329,7 +330,7 @@ gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# k8s.io/api v0.32.3
+# k8s.io/api v0.32.6
 ## explicit; go 1.23.0
 k8s.io/api/admissionregistration/v1
 k8s.io/api/admissionregistration/v1alpha1
@@ -388,7 +389,7 @@ k8s.io/api/storage/v1
 k8s.io/api/storage/v1alpha1
 k8s.io/api/storage/v1beta1
 k8s.io/api/storagemigration/v1alpha1
-# k8s.io/apimachinery v0.32.3
+# k8s.io/apimachinery v0.32.6
 ## explicit; go 1.23.0
 k8s.io/apimachinery/pkg/api/equality
 k8s.io/apimachinery/pkg/api/errors
@@ -440,7 +441,7 @@ k8s.io/apimachinery/pkg/version
 k8s.io/apimachinery/pkg/watch
 k8s.io/apimachinery/third_party/forked/golang/json
 k8s.io/apimachinery/third_party/forked/golang/reflect
-# k8s.io/client-go v0.32.3
+# k8s.io/client-go v0.32.6
 ## explicit; go 1.23.0
 k8s.io/client-go/applyconfigurations
 k8s.io/client-go/applyconfigurations/admissionregistration/v1
