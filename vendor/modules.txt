@@ -8,18 +8,18 @@ github.com/IBM-Cloud/ibm-cloud-cli-sdk/common/rest
 # github.com/IBM/go-sdk-core/v5 v5.17.4
 ## explicit; go 1.20
 github.com/IBM/go-sdk-core/v5/core
-# github.com/IBM/ibmcloud-volume-interface v1.2.13
+# github.com/IBM/ibmcloud-volume-interface v1.2.16
 ## explicit; go 1.23.10
 github.com/IBM/ibmcloud-volume-interface/config
 github.com/IBM/ibmcloud-volume-interface/lib/provider
 github.com/IBM/ibmcloud-volume-interface/lib/utils
 github.com/IBM/ibmcloud-volume-interface/lib/utils/reasoncode
 github.com/IBM/ibmcloud-volume-interface/provider/iam
-# github.com/IBM/secret-common-lib v1.1.13
+# github.com/IBM/secret-common-lib v1.1.14
 ## explicit; go 1.23.10
 github.com/IBM/secret-common-lib/pkg/secret_provider
 github.com/IBM/secret-common-lib/pkg/utils
-# github.com/IBM/secret-utils-lib v1.1.14
+# github.com/IBM/secret-utils-lib v1.1.15
 ## explicit; go 1.23.10
 github.com/IBM/secret-utils-lib/pkg/authenticator
 github.com/IBM/secret-utils-lib/pkg/config
@@ -330,7 +330,7 @@ gopkg.in/yaml.v2
 # gopkg.in/yaml.v3 v3.0.1
 ## explicit
 gopkg.in/yaml.v3
-# k8s.io/api v0.32.6
+# k8s.io/api v0.32.8
 ## explicit; go 1.23.0
 k8s.io/api/admissionregistration/v1
 k8s.io/api/admissionregistration/v1alpha1
@@ -389,7 +389,7 @@ k8s.io/api/storage/v1
 k8s.io/api/storage/v1alpha1
 k8s.io/api/storage/v1beta1
 k8s.io/api/storagemigration/v1alpha1
-# k8s.io/apimachinery v0.32.6
+# k8s.io/apimachinery v0.32.8
 ## explicit; go 1.23.0
 k8s.io/apimachinery/pkg/api/equality
 k8s.io/apimachinery/pkg/api/errors
@@ -441,7 +441,7 @@ k8s.io/apimachinery/pkg/version
 k8s.io/apimachinery/pkg/watch
 k8s.io/apimachinery/third_party/forked/golang/json
 k8s.io/apimachinery/third_party/forked/golang/reflect
-# k8s.io/client-go v0.32.6
+# k8s.io/client-go v0.32.8
 ## explicit; go 1.23.0
 k8s.io/client-go/applyconfigurations
 k8s.io/client-go/applyconfigurations/admissionregistration/v1
