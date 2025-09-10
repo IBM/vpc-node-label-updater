@@ -3,14 +3,14 @@ module github.com/IBM/vpc-node-label-updater
 go 1.23.10
 
 require (
-	github.com/IBM/ibmcloud-volume-interface v1.2.13
-	github.com/IBM/secret-common-lib v1.1.13
-	github.com/IBM/secret-utils-lib v1.1.14
+	github.com/IBM/ibmcloud-volume-interface v1.2.16
+	github.com/IBM/secret-common-lib v1.1.14
+	github.com/IBM/secret-utils-lib v1.1.15
 	github.com/stretchr/testify v1.9.0
 	go.uber.org/zap v1.27.0
-	k8s.io/api v0.32.6
-	k8s.io/apimachinery v0.32.6
-	k8s.io/client-go v0.32.6
+	k8s.io/api v0.32.8
+	k8s.io/apimachinery v0.32.8
+	k8s.io/client-go v0.32.8
 )
 
 require (
