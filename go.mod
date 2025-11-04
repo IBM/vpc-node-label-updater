@@ -1,6 +1,6 @@
 module github.com/IBM/vpc-node-label-updater
 
-go 1.23.10
+go 1.25.3
 
 require (
 	github.com/IBM/ibmcloud-volume-interface v1.2.16
