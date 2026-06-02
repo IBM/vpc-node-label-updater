@@ -1,11 +1,11 @@
 module github.com/IBM/vpc-node-label-updater
 
-go 1.25.9
+go 1.25.10
 
 require (
-	github.com/IBM/ibmcloud-volume-interface v1.2.20-0.20260428135321-44c2e3f5a391
-	github.com/IBM/secret-common-lib v1.1.15-0.20260428134409-f4f9ea8955aa
-	github.com/IBM/secret-utils-lib v1.1.16-0.20260428134227-f2f888ea0a61
+	github.com/IBM/ibmcloud-volume-interface v1.2.20
+	github.com/IBM/secret-common-lib v1.1.15
+	github.com/IBM/secret-utils-lib v1.1.16
 	github.com/stretchr/testify v1.11.1
 	go.uber.org/zap v1.27.0
 	k8s.io/api v0.35.4
