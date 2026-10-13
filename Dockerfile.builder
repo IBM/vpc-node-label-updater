@@ -1,4 +1,4 @@
-FROM golang:1.26.6
+FROM golang:1.26.9
 
 WORKDIR /go/src/github.com/IBM/vpc-node-label-updater
 ADD . /go/src/github.com/IBM/vpc-node-label-updater
